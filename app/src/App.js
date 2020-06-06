@@ -45,28 +45,12 @@ function App() {
   var isKeyPressedInThisIteration = false;
   var prevRandomNumbers = [];
   var gameLoopInterval;
+  var countDownInterval;
 
   const handleStartGame = () => {
-
-    //TMP
     setIsInGame(true)
     setAllLettersToGray()
-    // gameLoop()
-
-
-    // setCountdownVisibility(true);
-    // const interval = setInterval(() => {
-    //   setCounter((prevState) => {
-    //     if (prevState == 0) {
-    //       clearInterval(interval);
-    //       setCountdownVisibility(false)
-    //       setIsInGame(true)
-    //       gameLoop()
-    //     }
-
-    //     return prevState - 1;
-    //   });
-    // }, 1000);
+    setCountdownVisibility(true);
   };
 
   const handleStopGame = () => {
@@ -98,7 +82,7 @@ function App() {
         }
       })
 
-      setColorTypeForLetterValue(valueOfKeyPressed, 'hit');
+      setColorTypeForLetterValue(prevRandomNumbers[prevRandomNumbers.length - 1], 'hit');
 
     } else {
       setScore((prevScore) => {
@@ -109,7 +93,7 @@ function App() {
         }
       })
 
-      setColorTypeForLetterValue(valueOfKeyPressed, 'miss');
+      setColorTypeForLetterValue(prevRandomNumbers[prevRandomNumbers.length - 1], 'miss');
     }
 
     console.log(`{score}`);
@@ -138,7 +122,29 @@ function App() {
   }
 
   useEffect(() => {
-    if (isInGame) {
+    if (isCountdownVisible) {
+      countDownInterval = setInterval(() => {
+        setCounter((prevState) => {
+          if (prevState == 0) {
+            // clearInterval(interval);
+            setCountdownVisibility(false)
+            setIsInGame(true)
+            // gameLoop()
+          }
+
+          return prevState - 1;
+        });
+
+      }, 1000);
+    }
+    return () => {
+      clearInterval(countDownInterval)
+      setCounter(5)
+    }
+  }, [isCountdownVisible])
+
+  useEffect(() => {
+    if (isInGame && !isCountdownVisible) {
       setScore(defaultScore);
       const selectedDifficulty = Array.from(document.getElementsByName('difficulty')).find(el => el.checked).value;
       const timeLoop = selectedDifficulty * 1000;
@@ -189,7 +195,7 @@ function App() {
       }, timeLoop);
     }
     return () => clearInterval(gameLoopInterval);
-  }, [isInGame]);
+  }, [isInGame, isCountdownVisible]);
 
 
   return (
