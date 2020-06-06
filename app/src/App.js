@@ -39,11 +39,9 @@ function App() {
       ...alf,
       score: 'left'
     }))
-  )
-  // const [alfabetOptions, setAlfabetOptions] = useState([...ALFABET_KEY_VALUE_PAIRS]);
+  );
   const [score, setScore] = useState(defaultScore);
 
-  // var isKeyPressedInThisIteration = false;
   const [isKeyPressedInThisIteration, setKeyPressedInThisIteration] = useState(false);
   var gameLoopInterval;
   var countDownInterval;
@@ -58,12 +56,10 @@ function App() {
   const handleStopGame = () => {
     setIsInGame(false);
     clearInterval(gameLoopInterval);
-    // document.removeEventListener("keypress", handleKeyPress);
     setPrevRandomNumbers([]);
   };
 
   const defineScore = useCallback((type) => {
-    console.log(type)
     if (type == 'miss') {
       setScore((prevScore) => {
         return {
@@ -141,7 +137,6 @@ function App() {
 
           return prevState - 1;
         });
-
       }, 1000);
     }
     return () => {
@@ -153,10 +148,8 @@ function App() {
   useEffect(() => {
     if (isInGame && !isCountdownVisible) {
       console.log(prevRandomNumbers)
-      // setScore(defaultScore);
       const selectedDifficulty = Array.from(document.getElementsByName('difficulty')).find(el => el.checked).value;
       const timeLoop = selectedDifficulty * 1000;
-      // document.addEventListener("keypress", handleKeyPress);
 
       gameLoopInterval = setInterval(() => {
         if (prevRandomNumbers.length == alfabetForDisplay.length) {
@@ -173,12 +166,10 @@ function App() {
             .find(alf => prevRandomNumbers[prevRandomNumbers.length - 1] == alf.value)
             .score == 'left'
         ) {
-          console.log(alfabetForDisplay.find(alf => prevRandomNumbers[prevRandomNumbers.length - 1] == alf.value))
           defineScore('miss')
           setColorTypeForLetterValue(prevRandomNumbers[prevRandomNumbers.length - 1], 'miss')
         }
 
-        // isKeyPressedInThisIteration = false;
         setKeyPressedInThisIteration(false);
         var rand = Math.floor(Math.random() * (alfabetForDisplay.length - 1 + 1)) + 1;
 
