@@ -26,7 +26,7 @@ const radioButton = <Radio color="primary" />;
 const defaultScore = {
   hit: 0,
   miss: 0,
-  left: 26
+  left: ALFABET_KEY_VALUE_PAIRS.length
 };
 
 function App() {
@@ -44,7 +44,6 @@ function App() {
 
   const [isKeyPressedInThisIteration, setKeyPressedInThisIteration] = useState(false);
   var gameLoopInterval;
-  var countDownInterval;
 
   const handleStartGame = () => {
     setIsInGame(true)
@@ -84,7 +83,7 @@ function App() {
   const handleKeyPress = (evt) => {
     console.log(`{{{isKeyPressedInThisIteration}}}`)
     console.log(isKeyPressedInThisIteration)
-    if (isInGame && !isKeyPressedInThisIteration) {
+    if (isInGame && !isKeyPressedInThisIteration && prevRandomNumbers.length > 0) {
       const keyPressed = evt.key;
       const valueOfKeyPressed = alfabetForDisplay.find(el => el.letter.toLowerCase() == keyPressed.toLowerCase()).value;
 
@@ -114,6 +113,48 @@ function App() {
     })
   };
 
+  const gameIteration = () => {
+    if (prevRandomNumbers.length == alfabetForDisplay.length) {
+      if (alfabetForDisplay
+        .find(alf => prevRandomNumbers[prevRandomNumbers.length - 1] == alf.value)
+        .score == 'left') {
+        defineScore('miss')
+      }
+      setColorTypeForLetterValue(prevRandomNumbers[prevRandomNumbers.length - 1], 'miss')
+      handleStopGame();
+      return;
+    }
+
+    if (
+      !isKeyPressedInThisIteration &&
+      prevRandomNumbers.length > 0
+      &&
+      alfabetForDisplay
+        .find(alf => prevRandomNumbers[prevRandomNumbers.length - 1] == alf.value)
+        .score == 'left'
+    ) {
+      defineScore('miss')
+      setColorTypeForLetterValue(prevRandomNumbers[prevRandomNumbers.length - 1], 'miss')
+    }
+
+    setKeyPressedInThisIteration(false);
+    var rand = Math.floor(Math.random() * (alfabetForDisplay.length - 1 + 1)) + 1;
+
+    if (prevRandomNumbers.find(num => num == rand)) {
+      while (isInGame && prevRandomNumbers.find(num => num == rand)) {
+        if (prevRandomNumbers.length == alfabetForDisplay.length) { //no one wants stackoverflow :)
+          handleStopGame();
+          break;
+        }
+        rand = Math.floor(Math.random() * (alfabetForDisplay.length - 1 + 1)) + 1;
+      }
+    }
+
+    // prevRandomNumbers.push(rand);
+    setPrevRandomNumbers(prevValue => {
+      return [...prevValue, rand]
+    })
+  }
   const setColorTypeForLetterValue = useCallback((value, type) => {
     setAlfabetForDisplay((prevAlf) => {
       return prevAlf.map(el =>
@@ -127,6 +168,8 @@ function App() {
   }, []);
 
   useEffect(() => {
+    var countDownInterval;
+
     if (isCountdownVisible) {
       countDownInterval = setInterval(() => {
         setCounter((prevState) => {
@@ -152,42 +195,7 @@ function App() {
       const timeLoop = selectedDifficulty * 1000;
 
       gameLoopInterval = setInterval(() => {
-        if (prevRandomNumbers.length == alfabetForDisplay.length) {
-          setColorTypeForLetterValue(prevRandomNumbers[prevRandomNumbers.length - 1], 'miss')
-          handleStopGame();
-          return;
-        }
-
-        if (
-          !isKeyPressedInThisIteration &&
-          prevRandomNumbers.length > 0 //TODO TMP!!!! --- ovo promeniti kada se otkloni bug pokretanja pre inicijalizcije
-          &&
-          alfabetForDisplay
-            .find(alf => prevRandomNumbers[prevRandomNumbers.length - 1] == alf.value)
-            .score == 'left'
-        ) {
-          defineScore('miss')
-          setColorTypeForLetterValue(prevRandomNumbers[prevRandomNumbers.length - 1], 'miss')
-        }
-
-        setKeyPressedInThisIteration(false);
-        var rand = Math.floor(Math.random() * (alfabetForDisplay.length - 1 + 1)) + 1;
-
-        if (prevRandomNumbers.find(num => num == rand)) {
-          while (isInGame && prevRandomNumbers.find(num => num == rand)) {
-            if (prevRandomNumbers.length == alfabetForDisplay.length) { //no one wants stackoverflow :)
-              handleStopGame();
-              break;
-            }
-            rand = Math.floor(Math.random() * (alfabetForDisplay.length - 1 + 1)) + 1;
-          }
-        }
-
-        // prevRandomNumbers.push(rand);
-        setPrevRandomNumbers(prevValue => {
-          return [...prevValue, rand]
-        })
-        console.log(prevRandomNumbers)
+        gameIteration();
       }, timeLoop);
     }
     return () => clearInterval(gameLoopInterval);
@@ -206,7 +214,7 @@ function App() {
               Choose Difficulty
             </FormLabel>
 
-            <RadioGroup row aria-label="position" name="difficulty" defaultValue="0.2">
+            <RadioGroup row aria-label="position" name="difficulty" defaultValue="1">
               <FormControlLabel
                 value="5"
                 control={radioButton}
@@ -220,7 +228,7 @@ function App() {
                 disabled={isInGame}
               />
               <FormControlLabel
-                value="0.2"
+                value="1"
                 control={radioButton}
                 label="Hard"
                 disabled={isInGame}
