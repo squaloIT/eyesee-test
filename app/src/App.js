@@ -97,6 +97,9 @@ function App() {
           left: prevScore.left - 1
         }
       })
+
+      setColorTypeForLetterValue(valueOfKeyPressed, 'hit');
+
     } else {
       setScore((prevScore) => {
         return {
@@ -107,7 +110,6 @@ function App() {
       })
 
       setColorTypeForLetterValue(valueOfKeyPressed, 'miss');
-      console.log(alfabetForDisplay)
     }
 
     console.log(`{score}`);
@@ -140,12 +142,10 @@ function App() {
       setScore(defaultScore);
       const selectedDifficulty = Array.from(document.getElementsByName('difficulty')).find(el => el.checked).value;
       const timeLoop = selectedDifficulty * 1000;
-
       document.addEventListener("keypress", handleKeyPress);
 
       gameLoopInterval = setInterval(() => {
         if (prevRandomNumbers.length == alfabetForDisplay.length) {
-
           setColorTypeForLetterValue(prevRandomNumbers[prevRandomNumbers.length - 1], 'miss')
           handleStopGame();
           return;
