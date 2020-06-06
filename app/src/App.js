@@ -29,6 +29,8 @@ const defaultScore = {
   left: 26
 };
 
+var gameLoopInterval = null;
+
 function App() {
   const [isCountdownVisible, setCountdownVisibility] = useState(false);
   const [isInGame, setIsInGame] = useState(false);
@@ -39,15 +41,23 @@ function App() {
       score: 'left'
     }))
   )
-  const [alfabetOptions, setAlfabetOptions] = useState([...ALFABET_KEY_VALUE_PAIRS]);
+  // const [alfabetOptions, setAlfabetOptions] = useState([...ALFABET_KEY_VALUE_PAIRS]);
   const [score, setScore] = useState(defaultScore);
-  // const [isKeyPressedInThisIteration, setKeyPressedForIteration] = useState(false);
-  var isKeyPressedInThisIteration = false
 
-  var gameLoopInterval = null;
+  var isKeyPressedInThisIteration = false;
+  var prevRandomNumbers = [];
+
 
   const handleStartGame = () => {
+
+    //TMP
+    setIsInGame(true)
     gameLoop()
+
+
+
+
+
     // setCountdownVisibility(true);
     // const interval = setInterval(() => {
     //   setCounter((prevState) => {
@@ -65,16 +75,25 @@ function App() {
 
   const handleStopGame = () => {
     setIsInGame(false);
+    clearInterval(gameLoopInterval);
+    document.removeEventListener("keypress", handleKeyPress);
+    prevRandomNumbers = [];
   };
 
   const handleKeyPress = (evt) => {
-    const keyPressed = evt.key;
-
     if (isKeyPressedInThisIteration)
       return;
 
+    const keyPressed = evt.key;
+    const valueOfKeyPressed = alfabetForDisplay.find(el => el.letter.toLowerCase() == keyPressed.toLowerCase()).value;
     //promeniti skor itd
-    if (alfabetOptions.find(el => el.letter.toLowerCase() == keyPressed.toLowerCase())) {
+    console.log(`valueOfKeyPressed`)
+    console.log(valueOfKeyPressed)
+
+    console.log(`keyPressed`)
+    console.log(keyPressed)
+
+    if (valueOfKeyPressed == prevRandomNumbers[prevRandomNumbers.length - 1]) {
       setScore((prevScore) => {
         return {
           ...prevScore,
@@ -86,15 +105,15 @@ function App() {
       setScore((prevScore) => {
         return {
           ...prevScore,
-          miss: prevScore.hit + 1,
+          miss: prevScore.miss + 1,
           left: prevScore.left - 1
         }
       })
     }
-    // setAlfabetOptions((prevVal) => {
-    //   return prevVal.filter()
-    // });
-    // FILTRIRATI ELEMENTE TAKO DA U IGRI OSTANU SVI BEZ OVIH
+    console.log(`{score}`);
+    console.log(score);
+
+    //!TODO promeniti boju elementu sa tom vrednoscu
     isKeyPressedInThisIteration = true;
   };
 
@@ -106,9 +125,37 @@ function App() {
     document.addEventListener("keypress", handleKeyPress);
 
     gameLoopInterval = setInterval(() => {
-      console.log(`SET INTERVAL -- ${isKeyPressedInThisIteration}`);
+      if (score.left == 0) {
+        console.log("to je to")
+        handleStopGame()
+      }
+
+      if (!isKeyPressedInThisIteration) {
+        setScore((prevScore) => {
+          return {
+            ...prevScore,
+            miss: prevScore.miss + 1,
+            left: prevScore.left - 1
+          }
+        })
+      }
+
       isKeyPressedInThisIteration = false;
-      console.log(`SET INTERVAL -- ${isKeyPressedInThisIteration}`);
+      var rand = Math.floor(Math.random() * (alfabetForDisplay.length - 1 + 1)) + 1;
+
+      if (prevRandomNumbers.find(num => num == rand)) {
+        while (isInGame && prevRandomNumbers.find(num => num == rand)) {
+          if (prevRandomNumbers.length == alfabetForDisplay.length) { //no one wants stackoverflow :)
+            // setIsInGame(false);
+            handleStopGame();
+            break;
+          }
+          rand = Math.floor(Math.random() * (alfabetForDisplay.length - 1 + 1)) + 1;
+        }
+      }
+
+      prevRandomNumbers.push(rand);
+      console.log(prevRandomNumbers)
     }, timeLoop);
   }
 
@@ -124,7 +171,7 @@ function App() {
               Choose Difficulty
             </FormLabel>
 
-            <RadioGroup row aria-label="position" name="difficulty" defaultValue="5">
+            <RadioGroup row aria-label="position" name="difficulty" defaultValue="2">
               <FormControlLabel
                 value="5"
                 control={radioButton}
@@ -158,7 +205,7 @@ function App() {
             `block__game__random-number 
             ${isInGame ? 'block__game__random-number--display-true' : 'block__game__random-number--display-false'}`
           }>
-            <h2>17</h2>
+            <h2>{prevRandomNumbers[prevRandomNumbers.length - 1]}</h2>
           </div>
 
           <div className="block__game grid__abeceda">
