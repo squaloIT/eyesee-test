@@ -23,57 +23,133 @@ import './App.css';
   Because of faster re-rendering I hoisted radio button at the top.
 */
 const radioButton = <Radio color="primary" />;
+const defaultScore = {
+  hit: 0,
+  miss: 0,
+  left: 26
+};
 
 function App() {
   const [isCountdownVisible, setCountdownVisibility] = useState(false);
   const [isInGame, setIsInGame] = useState(false);
   const [counter, setCounter] = useState(5);
+  const [alfabetForDisplay, setAlfabet] = useState(
+    ALFABET_KEY_VALUE_PAIRS.map(alf => ({
+      ...alf,
+      score: 'left'
+    }))
+  )
+  const [alfabetOptions, setAlfabetOptions] = useState([...ALFABET_KEY_VALUE_PAIRS]);
+  const [score, setScore] = useState(defaultScore);
+  const [isKeyPressedInThisIteration, setKeyPressedForIteration] = useState(false);
+
+
+  var gameLoopInterval = null;
 
   const handleStartGame = () => {
-    setCountdownVisibility(true);
-    const interval = setInterval(() => {
-      setCounter((prevState) => {
-        if (prevState == 0) {
-          clearInterval(interval);
-          setCountdownVisibility(false)
-          setIsInGame(true)
-        }
+    gameLoop()
+    // setCountdownVisibility(true);
+    // const interval = setInterval(() => {
+    //   setCounter((prevState) => {
+    //     if (prevState == 0) {
+    //       clearInterval(interval);
+    //       setCountdownVisibility(false)
+    //       setIsInGame(true)
+    //       gameLoop()
+    //     }
 
-        return prevState - 1;
-      });
-    }, 1000);
+    //     return prevState - 1;
+    //   });
+    // }, 1000);
   };
+
+  const handleStopGame = () => {
+    setIsInGame(false);
+  };
+
+  const handleKeyPress = (evt) => {
+    const keyPressed = evt.key;
+    if (isKeyPressedInThisIteration)
+      return;
+
+    //promeniti skor itd
+    if (alfabetOptions.find(el => el.letter.toLowerCase() == keyPressed.toLowerCase())) {
+      setScore((prevScore) => {
+        return {
+          ...prevScore,
+          hit: prevScore.hit + 1,
+          left: prevScore - 1
+        }
+      })
+    } else {
+      setScore((prevScore) => {
+        return {
+          ...prevScore,
+          miss: prevScore.hit + 1,
+          left: prevScore - 1
+        }
+      })
+    }
+    // setAlfabetOptions((prevVal) => {
+    //   return prevVal.filter()
+    // });
+    // FILTRIRATI ELEMENTE TAKO DA U IGRI OSTANU SVI BEZ OVIH
+
+    setKeyPressedForIteration(true);
+  };
+
+  const gameLoop = () => {
+    setScore(defaultScore);
+    const selectedDifficulty = Array.from(document.getElementsByName('difficulty')).find(el => el.checked).value;
+    const timeLoop = selectedDifficulty * 1000;
+
+    document.addEventListener("keypress", handleKeyPress);
+
+    gameLoopInterval = setInterval(() => {
+      setKeyPressedForIteration(false);
+    }, timeLoop);
+  }
 
   return (
     <div className="App">
       <div className="block">
         <div className="block__difficulty">
           <FormControl component="fieldset">
-            <FormLabel component="legend" className="block__difficulty__label--big-font-label">
+            <FormLabel component="legend" className={
+              `block__difficulty__label--big-font-label
+              ${isInGame ? 'paper--color-gray' : ''}`
+            }>
               Choose Difficulty
             </FormLabel>
 
-            <RadioGroup row aria-label="position" name="difficulty" defaultValue="easy">
+            <RadioGroup row aria-label="position" name="difficulty" defaultValue="5">
               <FormControlLabel
-                value="easy"
+                value="5"
                 control={radioButton}
                 label="Easy"
+                disabled={isInGame}
               />
               <FormControlLabel
-                value="medium"
+                value="3.5"
                 control={radioButton}
                 label="Medium"
+                disabled={isInGame}
               />
               <FormControlLabel
-                value="hard"
+                value="2"
                 control={radioButton}
                 label="Hard"
+                disabled={isInGame}
               />
             </RadioGroup>
           </FormControl>
         </div>
 
-        <Button variant="outlined" color="primary" onClick={() => handleStartGame()}>Start game</Button>
+        <Button variant="outlined" color="primary" onClick={
+          isInGame ? () => handleStopGame() : () => handleStartGame()
+        }>
+          {isInGame ? 'Stop game' : 'Start game'}
+        </Button>
 
         <div className='block__game'>
           <div className={
@@ -85,11 +161,13 @@ function App() {
 
           <div className="block__game grid__abeceda">
             <Grid container spacing={0}>
-              {ALFABET_KEY_VALUE_PAIRS.map(alf => {
-                return (<Grid item xs={2} className="grid__abeceda__row--mt-10" key={alf.letter}>
-                  <p className='paper--font-big paper--color-gray'>{alf.letter} ({alf.value})</p>
-                </Grid>)
-              })}
+              {
+                alfabetForDisplay.map(alf => {
+                  return (<Grid item xs={2} className="grid__abeceda__row--mt-10" key={alf.letter}>
+                    <p className={`paper--font-big paper--color-${alf.score}`}>{alf.letter} ({alf.value})</p>
+                  </Grid>)
+                })
+              }
             </Grid>
           </div>
         </div>
@@ -106,9 +184,9 @@ function App() {
 
       <div className='block__score'>
         <h4 className="paper--color-gray">YOUR SCORE</h4>
-        <h4 className="paper--color-green">HIT: 0</h4>
-        <h4 className="paper--color-red">MISS: 0</h4>
-        <h4 className="paper--color-purple">LEFT: {ALFABET_KEY_VALUE_PAIRS.length}</h4>
+        <h4 className="paper--color-hit">HIT: {score.hit}</h4>
+        <h4 className="paper--color-miss">MISS: {score.miss}</h4>
+        <h4 className="paper--color-purple">LEFT: {score.left}</h4>
       </div>
     </div>
   );

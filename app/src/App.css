@@ -47,15 +47,15 @@
   font-size:30px;
 }
 
-.paper--color-gray {
+.paper--color-left {
   color:#939AA4;
 }
 
-.paper--color-green {
+.paper--color-hit {
   color:#10c891;  
 }
 
-.paper--color-red {
+.paper--color-miss {
   color:#ff4500;
 }
 .paper--color-purple {
