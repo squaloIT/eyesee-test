@@ -119,6 +119,7 @@ function App() {
         defineScore('left')
         setColorTypeForLetterValue(prevRandomNumbers[prevRandomNumbers.length - 1], 'miss')
       }
+
       handleStopGame();
       return;
     }
@@ -219,7 +220,7 @@ function App() {
               Choose Difficulty
             </FormLabel>
 
-            <RadioGroup row aria-label="position" name="difficulty" defaultValue="1.5">
+            <RadioGroup row aria-label="position" name="difficulty" defaultValue="2">
               <FormControlLabel
                 value="5"
                 control={radioButton}
@@ -233,7 +234,7 @@ function App() {
                 disabled={isInGame}
               />
               <FormControlLabel
-                value="1.5"
+                value="2"
                 control={radioButton}
                 label="Hard"
                 disabled={isInGame}
