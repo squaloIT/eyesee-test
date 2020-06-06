@@ -53,8 +53,8 @@ function App() {
 
         <Button variant="outlined" color="primary">Start game</Button>
 
-        <div className='block__game block__game--display-true'>
-          <div className='block__game__random-number'>
+        <div className='block__game'>
+          <div className='block__game__random-number block__game__random-number--display-true'>
             <h2>17</h2>
           </div>
 
@@ -74,6 +74,13 @@ function App() {
 
       <div className="block__countdown block__countdown--display-false block__countdown--background-black">
         <h1>5</h1>
+      </div>
+
+      <div className='block__score'>
+        <h4 className="paper--color-gray">YOUR SCORE</h4>
+        <h4 className="paper--color-green">HIT: 0</h4>
+        <h4 className="paper--color-red">MISS: 0</h4>
+        <h4 className="paper--color-purple">LEFT: 26</h4>
       </div>
     </div>
   );
