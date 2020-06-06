@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 // DIFFICULTY
 import Radio from '@material-ui/core/Radio';
@@ -33,6 +33,7 @@ function App() {
   const [isCountdownVisible, setCountdownVisibility] = useState(false);
   const [isInGame, setIsInGame] = useState(false);
   const [counter, setCounter] = useState(5);
+  const [prevRandomNumbers, setPrevRandomNumbers] = useState([]);
   const [alfabetForDisplay, setAlfabetForDisplay] = useState(
     ALFABET_KEY_VALUE_PAIRS.map(alf => ({
       ...alf,
@@ -42,8 +43,8 @@ function App() {
   // const [alfabetOptions, setAlfabetOptions] = useState([...ALFABET_KEY_VALUE_PAIRS]);
   const [score, setScore] = useState(defaultScore);
 
-  var isKeyPressedInThisIteration = false;
-  var prevRandomNumbers = [];
+  // var isKeyPressedInThisIteration = false;
+  const [isKeyPressedInThisIteration, setKeyPressedInThisIteration] = useState(false);
   var gameLoopInterval;
   var countDownInterval;
 
@@ -51,40 +52,19 @@ function App() {
     setIsInGame(true)
     setAllLettersToGray()
     setCountdownVisibility(true);
+    setScore(defaultScore);
   };
 
   const handleStopGame = () => {
     setIsInGame(false);
     clearInterval(gameLoopInterval);
-    document.removeEventListener("keypress", handleKeyPress);
-    prevRandomNumbers = [];
+    // document.removeEventListener("keypress", handleKeyPress);
+    setPrevRandomNumbers([]);
   };
 
-  const handleKeyPress = (evt) => {
-    if (isKeyPressedInThisIteration)
-      return;
-
-    const keyPressed = evt.key;
-    const valueOfKeyPressed = alfabetForDisplay.find(el => el.letter.toLowerCase() == keyPressed.toLowerCase()).value;
-    //promeniti skor itd
-    console.log(`valueOfKeyPressed`)
-    console.log(valueOfKeyPressed)
-
-    console.log(`keyPressed`)
-    console.log(keyPressed)
-
-    if (valueOfKeyPressed == prevRandomNumbers[prevRandomNumbers.length - 1]) {
-      setScore((prevScore) => {
-        return {
-          ...prevScore,
-          hit: prevScore.hit + 1,
-          left: prevScore.left - 1
-        }
-      })
-
-      setColorTypeForLetterValue(prevRandomNumbers[prevRandomNumbers.length - 1], 'hit');
-
-    } else {
+  const defineScore = useCallback((type) => {
+    console.log(type)
+    if (type == 'miss') {
       setScore((prevScore) => {
         return {
           ...prevScore,
@@ -92,16 +72,56 @@ function App() {
           left: prevScore.left - 1
         }
       })
-
-      setColorTypeForLetterValue(prevRandomNumbers[prevRandomNumbers.length - 1], 'miss');
     }
 
-    console.log(`{score}`);
-    console.log(score);
+    if (type == 'hit') {
+      setScore((prevScore) => {
+        return {
+          ...prevScore,
+          hit: prevScore.hit + 1,
+          left: prevScore.left - 1
+        }
+      })
+    }
+  }, []);
 
-    //!TODO promeniti boju elementu sa tom vrednoscu
-    isKeyPressedInThisIteration = true;
+  const handleKeyPress = (evt) => {
+    console.log(`{{{isKeyPressedInThisIteration}}}`)
+    console.log(isKeyPressedInThisIteration)
+    if (isInGame && !isKeyPressedInThisIteration) {
+      const keyPressed = evt.key;
+      const valueOfKeyPressed = alfabetForDisplay.find(el => el.letter.toLowerCase() == keyPressed.toLowerCase()).value;
+      //promeniti skor itd
+      console.log(`valueOfKeyPressed`)
+      console.log(valueOfKeyPressed)
+
+      console.log(`keyPressed`)
+      console.log(keyPressed)
+
+      if (valueOfKeyPressed == prevRandomNumbers[prevRandomNumbers.length - 1]) {
+        defineScore('hit');
+        setColorTypeForLetterValue(prevRandomNumbers[prevRandomNumbers.length - 1], 'hit');
+      } else {
+        defineScore('miss')
+        setColorTypeForLetterValue(prevRandomNumbers[prevRandomNumbers.length - 1], 'miss');
+      }
+
+      console.log(`{score}`);
+      console.log(score);
+
+      //!TODO promeniti boju elementu sa tom vrednoscu
+      // isKeyPressedInThisIteration = true;
+      setKeyPressedInThisIteration(true);
+    }
   };
+
+  useEffect(() => {
+    window.addEventListener('keypress', handleKeyPress);
+
+    return () => {
+      window.removeEventListener('keypress', handleKeyPress);
+    };
+  }, [handleKeyPress]);
 
   const setAllLettersToGray = () => {
     alfabetForDisplay.forEach(el => {
@@ -145,10 +165,11 @@ function App() {
 
   useEffect(() => {
     if (isInGame && !isCountdownVisible) {
-      setScore(defaultScore);
+      console.log(prevRandomNumbers)
+      // setScore(defaultScore);
       const selectedDifficulty = Array.from(document.getElementsByName('difficulty')).find(el => el.checked).value;
       const timeLoop = selectedDifficulty * 1000;
-      document.addEventListener("keypress", handleKeyPress);
+      // document.addEventListener("keypress", handleKeyPress);
 
       gameLoopInterval = setInterval(() => {
         if (prevRandomNumbers.length == alfabetForDisplay.length) {
@@ -158,26 +179,12 @@ function App() {
         }
 
         if (!isKeyPressedInThisIteration) {
-          setScore((prevScore) => {
-            return {
-              ...prevScore,
-              miss: prevScore.miss + 1,
-              left: prevScore.left - 1
-            }
-          })
-
-          setAlfabetForDisplay((prevAlf) => {
-            return prevAlf.map(el =>
-              el.value == prevRandomNumbers[prevRandomNumbers.length - 1] ? ({
-                ...el,
-                score: 'miss'
-              })
-                : el
-            )
-          });
+          defineScore('miss')
+          setColorTypeForLetterValue(prevRandomNumbers[prevRandomNumbers.length - 1], 'miss')
         }
 
-        isKeyPressedInThisIteration = false;
+        // isKeyPressedInThisIteration = false;
+        setKeyPressedInThisIteration(false);
         var rand = Math.floor(Math.random() * (alfabetForDisplay.length - 1 + 1)) + 1;
 
         if (prevRandomNumbers.find(num => num == rand)) {
@@ -190,12 +197,15 @@ function App() {
           }
         }
 
-        prevRandomNumbers.push(rand);
+        // prevRandomNumbers.push(rand);
+        setPrevRandomNumbers(prevValue => {
+          return [...prevValue, rand]
+        })
         console.log(prevRandomNumbers)
       }, timeLoop);
     }
     return () => clearInterval(gameLoopInterval);
-  }, [isInGame, isCountdownVisible]);
+  }, [isInGame, isCountdownVisible, prevRandomNumbers]);
 
 
   return (
