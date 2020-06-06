@@ -153,6 +153,7 @@ function App() {
       return [...prevValue, rand]
     })
   }
+
   const setColorTypeForLetterValue = useCallback((value, type) => {
     setAlfabetForDisplay((prevAlf) => {
       return prevAlf.map(el =>
