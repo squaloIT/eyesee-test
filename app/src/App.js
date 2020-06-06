@@ -63,7 +63,6 @@ function App() {
         return {
           ...prevScore,
           miss: prevScore.miss + 1,
-          left: prevScore.left - 1
         }
       })
     }
@@ -73,7 +72,14 @@ function App() {
         return {
           ...prevScore,
           hit: prevScore.hit + 1,
-          left: prevScore.left - 1
+        }
+      })
+    }
+    if (type == 'left') {
+      setScore((prevScore) => {
+        return {
+          ...prevScore,
+          left: prevScore.left - 1,
         }
       })
     }
@@ -82,13 +88,15 @@ function App() {
   const handleKeyPress = (evt) => {
     if (isInGame && !isKeyPressedInThisIteration && prevRandomNumbers.length > 0) {
       const keyPressed = evt.key;
-      const valueOfKeyPressed = alfabetForDisplay.find(el => el.letter.toLowerCase() == keyPressed.toLowerCase()).value;
+      const valueOfKeyPressed = alfabetForDisplay.find(el => el.letter.toLowerCase() == keyPressed.toLowerCase()) ? alfabetForDisplay.find(el => el.letter.toLowerCase() == keyPressed.toLowerCase()).value : '';
 
       if (valueOfKeyPressed == prevRandomNumbers[prevRandomNumbers.length - 1]) {
         defineScore('hit');
+        defineScore('left');
         setColorTypeForLetterValue(prevRandomNumbers[prevRandomNumbers.length - 1], 'hit');
       } else {
         defineScore('miss')
+        defineScore('left')
         setColorTypeForLetterValue(prevRandomNumbers[prevRandomNumbers.length - 1], 'miss');
       }
 
@@ -108,10 +116,10 @@ function App() {
         .find(alf => prevRandomNumbers[prevRandomNumbers.length - 1] == alf.value)
         .score == 'left') {
         defineScore('miss')
-      } else {
-        defineScore('hit')
+        defineScore('left')
+        setColorTypeForLetterValue(prevRandomNumbers[prevRandomNumbers.length - 1], 'miss')
       }
-      setColorTypeForLetterValue(prevRandomNumbers[prevRandomNumbers.length - 1], 'miss')
+
       handleStopGame();
       return;
     }
@@ -125,6 +133,7 @@ function App() {
         .score == 'left'
     ) {
       defineScore('miss')
+      defineScore('left')
       setColorTypeForLetterValue(prevRandomNumbers[prevRandomNumbers.length - 1], 'miss')
     }
 
@@ -145,12 +154,13 @@ function App() {
       return [...prevValue, rand]
     })
   }
+
   const setColorTypeForLetterValue = useCallback((value, type) => {
     setAlfabetForDisplay((prevAlf) => {
       return prevAlf.map(el =>
         el.value == value ? ({
           ...el,
-          score: type
+          score: prevRandomNumbers.length == alfabetForDisplay.length ? el.type : type
         })
           : el
       )
