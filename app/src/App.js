@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback } from 'react';
-
 // DIFFICULTY
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
@@ -12,11 +11,11 @@ import FormLabel from '@material-ui/core/FormLabel';
 import Button from '@material-ui/core/Button';
 //BUTTON
 
-//GRID
-import Grid from '@material-ui/core/Grid';
-//GRID
-
 import { ALFABET_KEY_VALUE_PAIRS } from './const/alfabet';
+import LetterGrid from './LetterGrid/LetterGrid';
+import Score from './Score/Score';
+import Countdown from './Countdown/Countdown';
+
 import './App.css';
 
 /*
@@ -97,14 +96,6 @@ function App() {
     }
   };
 
-  useEffect(() => {
-    window.addEventListener('keypress', handleKeyPress);
-
-    return () => {
-      window.removeEventListener('keypress', handleKeyPress);
-    };
-  }, [handleKeyPress]);
-
   const setAllLettersToGray = () => {
     alfabetForDisplay.forEach(el => {
       setColorTypeForLetterValue(el.value, 'left')
@@ -167,6 +158,14 @@ function App() {
   }, []);
 
   useEffect(() => {
+    window.addEventListener('keypress', handleKeyPress);
+
+    return () => {
+      window.removeEventListener('keypress', handleKeyPress);
+    };
+  }, [handleKeyPress]);
+
+  useEffect(() => {
     var countDownInterval;
 
     if (isCountdownVisible) {
@@ -211,7 +210,7 @@ function App() {
               Choose Difficulty
             </FormLabel>
 
-            <RadioGroup row aria-label="position" name="difficulty" defaultValue="1">
+            <RadioGroup row aria-label="position" name="difficulty" defaultValue="2">
               <FormControlLabel
                 value="5"
                 control={radioButton}
@@ -225,7 +224,7 @@ function App() {
                 disabled={isInGame}
               />
               <FormControlLabel
-                value="1"
+                value="2"
                 control={radioButton}
                 label="Hard"
                 disabled={isInGame}
@@ -248,35 +247,13 @@ function App() {
             <h2>{prevRandomNumbers[prevRandomNumbers.length - 1]}</h2>
           </div>
 
-          <div className="block__game grid__abeceda">
-            <Grid container spacing={0}>
-              {
-                alfabetForDisplay.map(alf => {
-                  return (<Grid item xs={2} className="grid__abeceda__row--mt-10" key={alf.letter}>
-                    <p className={`paper--font-big paper--color-${alf.score}`}>{alf.letter} ({alf.value})</p>
-                  </Grid>)
-                })
-              }
-            </Grid>
-          </div>
+          <LetterGrid alfabetForDisplay={alfabetForDisplay} />
         </div>
       </div>
 
-      <div className={`block__countdown block__countdown--background-black 
-        ${isCountdownVisible ? "block__countdown--display-true" : "block__countdown--display-false"}`
-      }
+      <Countdown isCountdownVisible={isCountdownVisible} counter={counter} />
 
-      >
-        <h1>GET READY IN ...</h1>
-        <h1>{counter} {counter ? '' : '!'}</h1>
-      </div>
-
-      <div className='block__score'>
-        <h4 className="paper--color-gray">YOUR SCORE</h4>
-        <h4 className="paper--color-hit">HIT: {score.hit}</h4>
-        <h4 className="paper--color-miss">MISS: {score.miss}</h4>
-        <h4 className="paper--color-purple">LEFT: {score.left}</h4>
-      </div>
+      <Score score={score} />
     </div>
   );
 }
