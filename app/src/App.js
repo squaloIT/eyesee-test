@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 // DIFFICULTY
 import Radio from '@material-ui/core/Radio';
@@ -25,12 +25,34 @@ import './App.css';
 const radioButton = <Radio color="primary" />;
 
 function App() {
+  const [isCountdownVisible, setCountdownVisibility] = useState(false);
+  const [isInGame, setIsInGame] = useState(false);
+  const [counter, setCounter] = useState(5);
+
+  const handleStartGame = () => {
+    setCountdownVisibility(true);
+    const interval = setInterval(() => {
+      setCounter((prevState) => {
+        if (prevState == 0) {
+          clearInterval(interval);
+          setCountdownVisibility(false)
+          setIsInGame(true)
+        }
+
+        return prevState - 1;
+      });
+    }, 1000);
+  };
+
   return (
     <div className="App">
       <div className="block">
         <div className="block__difficulty">
           <FormControl component="fieldset">
-            <FormLabel component="legend" className="block__difficulty__label--big-font-label">Choose Difficulty</FormLabel>
+            <FormLabel component="legend" className="block__difficulty__label--big-font-label">
+              Choose Difficulty
+            </FormLabel>
+
             <RadioGroup row aria-label="position" name="difficulty" defaultValue="easy">
               <FormControlLabel
                 value="easy"
@@ -51,10 +73,13 @@ function App() {
           </FormControl>
         </div>
 
-        <Button variant="outlined" color="primary">Start game</Button>
+        <Button variant="outlined" color="primary" onClick={() => handleStartGame()}>Start game</Button>
 
         <div className='block__game'>
-          <div className='block__game__random-number block__game__random-number--display-true'>
+          <div className={
+            `block__game__random-number 
+            ${isInGame ? 'block__game__random-number--display-true' : 'block__game__random-number--display-false'}`
+          }>
             <h2>17</h2>
           </div>
 
@@ -68,19 +93,22 @@ function App() {
             </Grid>
           </div>
         </div>
-
-
       </div>
 
-      <div className="block__countdown block__countdown--display-false block__countdown--background-black">
-        <h1>5</h1>
+      <div className={`block__countdown block__countdown--background-black 
+        ${isCountdownVisible ? "block__countdown--display-true" : "block__countdown--display-false"}`
+      }
+
+      >
+        <h1>GET READY IN ...</h1>
+        <h1>{counter} {counter ? '' : '!'}</h1>
       </div>
 
       <div className='block__score'>
         <h4 className="paper--color-gray">YOUR SCORE</h4>
         <h4 className="paper--color-green">HIT: 0</h4>
         <h4 className="paper--color-red">MISS: 0</h4>
-        <h4 className="paper--color-purple">LEFT: 26</h4>
+        <h4 className="paper--color-purple">LEFT: {ALFABET_KEY_VALUE_PAIRS.length}</h4>
       </div>
     </div>
   );

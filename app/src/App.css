@@ -34,7 +34,7 @@
 .block__game__random-number--display-true {
   display: block;
 }
-.block__game__random-number--display-true {
+.block__game__random-number--display-false {
   display: none;
 }
 
@@ -92,7 +92,6 @@
 }
 .block__countdown h1 {
   font-size:120px;
-  text-align:center;
   color:#fff;
 }
 /**************** COUNTDOWN TILL START ****************/
