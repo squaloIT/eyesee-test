@@ -41,8 +41,8 @@ function App() {
   )
   const [alfabetOptions, setAlfabetOptions] = useState([...ALFABET_KEY_VALUE_PAIRS]);
   const [score, setScore] = useState(defaultScore);
-  const [isKeyPressedInThisIteration, setKeyPressedForIteration] = useState(false);
-
+  // const [isKeyPressedInThisIteration, setKeyPressedForIteration] = useState(false);
+  var isKeyPressedInThisIteration = false
 
   var gameLoopInterval = null;
 
@@ -69,6 +69,7 @@ function App() {
 
   const handleKeyPress = (evt) => {
     const keyPressed = evt.key;
+
     if (isKeyPressedInThisIteration)
       return;
 
@@ -78,7 +79,7 @@ function App() {
         return {
           ...prevScore,
           hit: prevScore.hit + 1,
-          left: prevScore - 1
+          left: prevScore.left - 1
         }
       })
     } else {
@@ -86,7 +87,7 @@ function App() {
         return {
           ...prevScore,
           miss: prevScore.hit + 1,
-          left: prevScore - 1
+          left: prevScore.left - 1
         }
       })
     }
@@ -94,8 +95,7 @@ function App() {
     //   return prevVal.filter()
     // });
     // FILTRIRATI ELEMENTE TAKO DA U IGRI OSTANU SVI BEZ OVIH
-
-    setKeyPressedForIteration(true);
+    isKeyPressedInThisIteration = true;
   };
 
   const gameLoop = () => {
@@ -106,7 +106,9 @@ function App() {
     document.addEventListener("keypress", handleKeyPress);
 
     gameLoopInterval = setInterval(() => {
-      setKeyPressedForIteration(false);
+      console.log(`SET INTERVAL -- ${isKeyPressedInThisIteration}`);
+      isKeyPressedInThisIteration = false;
+      console.log(`SET INTERVAL -- ${isKeyPressedInThisIteration}`);
     }, timeLoop);
   }
 
