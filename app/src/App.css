@@ -42,6 +42,7 @@
 .grid__abeceda {
   margin-top:20px;
 }
+
 .grid__abeceda .paper--font-big {
   font-size:30px;
 }
@@ -53,12 +54,42 @@
 .grid__abeceda .paper--color-green {
   color:#10c891;  
 }
+
 .grid__abeceda .paper--color-red {
   color:#ff4500;
 }
+
 .grid__abeceda__row--mt-10 {
   flex-basis: 13.666667%!important;
 }
 /**************** GRID ****************/
 
 /**************** GAME ****************/
+
+
+/**************** COUNTDOWN TILL START ****************/
+.block__countdown {
+  position:absolute;
+  width:100%;
+  height:100%;
+}
+
+.block__countdown--background-black {
+  background-color:rgba(86,86,86,0.9);
+}
+
+.block__countdown--display-false {
+  display: none;
+}
+
+.block__countdown--display-true {
+  display: flex;  
+  justify-content: center;
+  align-items: center;
+}
+.block__countdown h1 {
+  font-size:120px;
+  text-align:center;
+  color:#fff;
+}
+/**************** COUNTDOWN TILL START ****************/

@@ -71,6 +71,10 @@ function App() {
 
 
       </div>
+
+      <div className="block__countdown block__countdown--display-false block__countdown--background-black">
+        <h1>5</h1>
+      </div>
     </div>
   );
 }
