@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 // DIFFICULTY
 import Radio from '@material-ui/core/Radio';
@@ -29,13 +29,11 @@ const defaultScore = {
   left: 26
 };
 
-var gameLoopInterval = null;
-
 function App() {
   const [isCountdownVisible, setCountdownVisibility] = useState(false);
   const [isInGame, setIsInGame] = useState(false);
   const [counter, setCounter] = useState(5);
-  const [alfabetForDisplay, setAlfabet] = useState(
+  const [alfabetForDisplay, setAlfabetForDisplay] = useState(
     ALFABET_KEY_VALUE_PAIRS.map(alf => ({
       ...alf,
       score: 'left'
@@ -46,16 +44,14 @@ function App() {
 
   var isKeyPressedInThisIteration = false;
   var prevRandomNumbers = [];
-
+  var gameLoopInterval;
 
   const handleStartGame = () => {
 
     //TMP
     setIsInGame(true)
-    gameLoop()
-
-
-
+    setAllLettersToGray()
+    // gameLoop()
 
 
     // setCountdownVisibility(true);
@@ -109,7 +105,11 @@ function App() {
           left: prevScore.left - 1
         }
       })
+
+      setColorTypeForLetterValue(valueOfKeyPressed, 'miss');
+      console.log(alfabetForDisplay)
     }
+
     console.log(`{score}`);
     console.log(score);
 
@@ -117,47 +117,80 @@ function App() {
     isKeyPressedInThisIteration = true;
   };
 
-  const gameLoop = () => {
-    setScore(defaultScore);
-    const selectedDifficulty = Array.from(document.getElementsByName('difficulty')).find(el => el.checked).value;
-    const timeLoop = selectedDifficulty * 1000;
+  const setAllLettersToGray = () => {
+    alfabetForDisplay.forEach(el => {
+      setColorTypeForLetterValue(el.value, 'left')
+    })
+  };
 
-    document.addEventListener("keypress", handleKeyPress);
-
-    gameLoopInterval = setInterval(() => {
-      if (score.left == 0) {
-        console.log("to je to")
-        handleStopGame()
-      }
-
-      if (!isKeyPressedInThisIteration) {
-        setScore((prevScore) => {
-          return {
-            ...prevScore,
-            miss: prevScore.miss + 1,
-            left: prevScore.left - 1
-          }
+  const setColorTypeForLetterValue = (value, type) => {
+    setAlfabetForDisplay((prevAlf) => {
+      return prevAlf.map(el =>
+        el.value == value ? ({
+          ...el,
+          score: type
         })
-      }
-
-      isKeyPressedInThisIteration = false;
-      var rand = Math.floor(Math.random() * (alfabetForDisplay.length - 1 + 1)) + 1;
-
-      if (prevRandomNumbers.find(num => num == rand)) {
-        while (isInGame && prevRandomNumbers.find(num => num == rand)) {
-          if (prevRandomNumbers.length == alfabetForDisplay.length) { //no one wants stackoverflow :)
-            // setIsInGame(false);
-            handleStopGame();
-            break;
-          }
-          rand = Math.floor(Math.random() * (alfabetForDisplay.length - 1 + 1)) + 1;
-        }
-      }
-
-      prevRandomNumbers.push(rand);
-      console.log(prevRandomNumbers)
-    }, timeLoop);
+          : el
+      )
+    });
   }
+
+  useEffect(() => {
+    if (isInGame) {
+      setScore(defaultScore);
+      const selectedDifficulty = Array.from(document.getElementsByName('difficulty')).find(el => el.checked).value;
+      const timeLoop = selectedDifficulty * 1000;
+
+      document.addEventListener("keypress", handleKeyPress);
+
+      gameLoopInterval = setInterval(() => {
+        if (prevRandomNumbers.length == alfabetForDisplay.length) {
+
+          setColorTypeForLetterValue(prevRandomNumbers[prevRandomNumbers.length - 1], 'miss')
+          handleStopGame();
+          return;
+        }
+
+        if (!isKeyPressedInThisIteration) {
+          setScore((prevScore) => {
+            return {
+              ...prevScore,
+              miss: prevScore.miss + 1,
+              left: prevScore.left - 1
+            }
+          })
+
+          setAlfabetForDisplay((prevAlf) => {
+            return prevAlf.map(el =>
+              el.value == prevRandomNumbers[prevRandomNumbers.length - 1] ? ({
+                ...el,
+                score: 'miss'
+              })
+                : el
+            )
+          });
+        }
+
+        isKeyPressedInThisIteration = false;
+        var rand = Math.floor(Math.random() * (alfabetForDisplay.length - 1 + 1)) + 1;
+
+        if (prevRandomNumbers.find(num => num == rand)) {
+          while (isInGame && prevRandomNumbers.find(num => num == rand)) {
+            if (prevRandomNumbers.length == alfabetForDisplay.length) { //no one wants stackoverflow :)
+              handleStopGame();
+              break;
+            }
+            rand = Math.floor(Math.random() * (alfabetForDisplay.length - 1 + 1)) + 1;
+          }
+        }
+
+        prevRandomNumbers.push(rand);
+        console.log(prevRandomNumbers)
+      }, timeLoop);
+    }
+    return () => clearInterval(gameLoopInterval);
+  }, [isInGame]);
+
 
   return (
     <div className="App">
@@ -171,7 +204,7 @@ function App() {
               Choose Difficulty
             </FormLabel>
 
-            <RadioGroup row aria-label="position" name="difficulty" defaultValue="2">
+            <RadioGroup row aria-label="position" name="difficulty" defaultValue="0.2">
               <FormControlLabel
                 value="5"
                 control={radioButton}
@@ -185,7 +218,7 @@ function App() {
                 disabled={isInGame}
               />
               <FormControlLabel
-                value="2"
+                value="0.2"
                 control={radioButton}
                 label="Hard"
                 disabled={isInGame}
