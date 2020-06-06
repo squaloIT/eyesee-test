@@ -117,8 +117,8 @@ function App() {
         .score == 'left') {
         defineScore('miss')
         defineScore('left')
+        setColorTypeForLetterValue(prevRandomNumbers[prevRandomNumbers.length - 1], 'miss')
       }
-      setColorTypeForLetterValue(prevRandomNumbers[prevRandomNumbers.length - 1], 'miss')
       handleStopGame();
       return;
     }
