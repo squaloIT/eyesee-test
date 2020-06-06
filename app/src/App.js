@@ -91,12 +91,6 @@ function App() {
     if (isInGame && !isKeyPressedInThisIteration) {
       const keyPressed = evt.key;
       const valueOfKeyPressed = alfabetForDisplay.find(el => el.letter.toLowerCase() == keyPressed.toLowerCase()).value;
-      //promeniti skor itd
-      console.log(`valueOfKeyPressed`)
-      console.log(valueOfKeyPressed)
-
-      console.log(`keyPressed`)
-      console.log(keyPressed)
 
       if (valueOfKeyPressed == prevRandomNumbers[prevRandomNumbers.length - 1]) {
         defineScore('hit');
@@ -106,11 +100,6 @@ function App() {
         setColorTypeForLetterValue(prevRandomNumbers[prevRandomNumbers.length - 1], 'miss');
       }
 
-      console.log(`{score}`);
-      console.log(score);
-
-      //!TODO promeniti boju elementu sa tom vrednoscu
-      // isKeyPressedInThisIteration = true;
       setKeyPressedInThisIteration(true);
     }
   };
@@ -129,7 +118,7 @@ function App() {
     })
   };
 
-  const setColorTypeForLetterValue = (value, type) => {
+  const setColorTypeForLetterValue = useCallback((value, type) => {
     setAlfabetForDisplay((prevAlf) => {
       return prevAlf.map(el =>
         el.value == value ? ({
@@ -139,17 +128,15 @@ function App() {
           : el
       )
     });
-  }
+  }, []);
 
   useEffect(() => {
     if (isCountdownVisible) {
       countDownInterval = setInterval(() => {
         setCounter((prevState) => {
           if (prevState == 0) {
-            // clearInterval(interval);
             setCountdownVisibility(false)
             setIsInGame(true)
-            // gameLoop()
           }
 
           return prevState - 1;
@@ -178,7 +165,15 @@ function App() {
           return;
         }
 
-        if (!isKeyPressedInThisIteration) {
+        if (
+          !isKeyPressedInThisIteration &&
+          prevRandomNumbers.length > 0 //TODO TMP!!!! --- ovo promeniti kada se otkloni bug pokretanja pre inicijalizcije
+          &&
+          alfabetForDisplay
+            .find(alf => prevRandomNumbers[prevRandomNumbers.length - 1] == alf.value)
+            .score == 'left'
+        ) {
+          console.log(alfabetForDisplay.find(alf => prevRandomNumbers[prevRandomNumbers.length - 1] == alf.value))
           defineScore('miss')
           setColorTypeForLetterValue(prevRandomNumbers[prevRandomNumbers.length - 1], 'miss')
         }
@@ -205,7 +200,7 @@ function App() {
       }, timeLoop);
     }
     return () => clearInterval(gameLoopInterval);
-  }, [isInGame, isCountdownVisible, prevRandomNumbers]);
+  }, [isInGame, isCountdownVisible, prevRandomNumbers, alfabetForDisplay]);
 
 
   return (
