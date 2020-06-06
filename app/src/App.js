@@ -81,8 +81,6 @@ function App() {
   }, []);
 
   const handleKeyPress = (evt) => {
-    console.log(`{{{isKeyPressedInThisIteration}}}`)
-    console.log(isKeyPressedInThisIteration)
     if (isInGame && !isKeyPressedInThisIteration && prevRandomNumbers.length > 0) {
       const keyPressed = evt.key;
       const valueOfKeyPressed = alfabetForDisplay.find(el => el.letter.toLowerCase() == keyPressed.toLowerCase()).value;
@@ -119,6 +117,8 @@ function App() {
         .find(alf => prevRandomNumbers[prevRandomNumbers.length - 1] == alf.value)
         .score == 'left') {
         defineScore('miss')
+      } else {
+        defineScore('hit')
       }
       setColorTypeForLetterValue(prevRandomNumbers[prevRandomNumbers.length - 1], 'miss')
       handleStopGame();
@@ -150,7 +150,6 @@ function App() {
       }
     }
 
-    // prevRandomNumbers.push(rand);
     setPrevRandomNumbers(prevValue => {
       return [...prevValue, rand]
     })
@@ -190,7 +189,6 @@ function App() {
 
   useEffect(() => {
     if (isInGame && !isCountdownVisible) {
-      console.log(prevRandomNumbers)
       const selectedDifficulty = Array.from(document.getElementsByName('difficulty')).find(el => el.checked).value;
       const timeLoop = selectedDifficulty * 1000;
 
@@ -200,7 +198,6 @@ function App() {
     }
     return () => clearInterval(gameLoopInterval);
   }, [isInGame, isCountdownVisible, prevRandomNumbers, alfabetForDisplay]);
-
 
   return (
     <div className="App">
