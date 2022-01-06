@@ -11,8 +11,6 @@ import FormLabel from '@material-ui/core/FormLabel';
 import Button from '@material-ui/core/Button';
 //BUTTON
 
-DJOKAAAAAAAAAA
-
 import { ALFABET_KEY_VALUE_PAIRS } from './const/alfabet';
 import LetterGrid from './LetterGrid/LetterGrid';
 import Score from './Score/Score';
